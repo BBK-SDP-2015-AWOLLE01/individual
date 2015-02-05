@@ -3,25 +3,20 @@ package sml;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class AddInstructionTest {
 
-	/*
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		String filename = "src/code.sml";
-		Machine m = new Machine();
-		Translator t = new Translator(filename);
-		t.readAndTranslate(m.getLabels(), m.getProg());
+	private Machine m;
+	
+	@Before
+	public void setUp() throws Exception {
+		m = new Machine();
+		m.setRegisters(new Registers());
 	}
-	*/
 
 	@Test
 	public void AddInstructionCorrectlyAddsTwoOperands() {
-		Machine m = new Machine();
-		m.setRegisters(new Registers());
 		int s1 = 20;
 		int s2 = 21;
 		int r = 22;
