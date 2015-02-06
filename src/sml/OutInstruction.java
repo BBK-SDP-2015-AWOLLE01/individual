@@ -1,7 +1,7 @@
 package sml;
 
 /**
- * This class implements the division instruction in SML
+ * This class implements the out instruction in SML
  * 
  * @author Alex Wollenschlaeger
  */
