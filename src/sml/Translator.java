@@ -108,8 +108,8 @@ public class Translator {
 			return new OutInstruction(label, r);
 		case "lin":
 			r = scanInt();
-			s1 = scanInt();
-			return new LinInstruction(label, r, s1);
+			x = scanInt();
+			return new LinInstruction(label, r, x);
 		}
 
 		// You will have to write code here for the other instructions.
