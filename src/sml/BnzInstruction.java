@@ -1,7 +1,7 @@
 package sml;
 
 /**
- * This class ....
+ * This class implements the branch-if-not-zero instruction in SML
  * 
  * @author someone
  */
