@@ -3,6 +3,7 @@ package sml;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -95,32 +96,70 @@ public class Translator {
 		 * We will also need to check for two-parameter constructors with signature
 		 * Instruction(String, int), such as OutInstruction.
 		 */
-		String className = scan().toLowerCase() + "Instruction";
-		className = "sml." + className.substring(0,1).toUpperCase() + className.substring(1);
-		Class<?> cls;
+		
+		/*
+		 * Create a fully qualified class name for the instruction
+		 * Declare Class and Constructor variables
+		 */
+		String ins = scan();
+		String insClassName = "sml." + ins.substring(0,1).toUpperCase() + ins.substring(1).toLowerCase() + "Instruction";
+		Class<?> insClass;
+		Constructor<?> insConstructor;
+		
+		/*
+		 * Attempt to create an instance of the class
+		 * 
+		 * Note that currently we are using reflection to capture the constructor signatures
+		 * that are present in the current Instruction subclass constructors
+		 */
 		try {
-			cls = Class.forName(className);
-			Constructor<?>[] allConstr = cls.getConstructors();
+			insClass = Class.forName(insClassName);
+			Constructor<?>[] allConstr = insClass.getConstructors();
 			for (Constructor<?> constr : allConstr) {
-				if (constr.getParameterTypes().length > 2) {
-					for (Class<?> pType : constr.getParameterTypes()) {
-						if (pType.getName().equals("String.class")) {
-							scan();
-						} else if (pType.getName().equals("int.class")) {
-							scanInt();
-						}
-					}
-				} else if (constr.getParameterTypes().length == 2) {
-					// TODO
+				if (constr.getParameterTypes().length == 2 &&
+						constr.getParameterTypes()[1].equals(int.class)) {
+					// need to make sure we call the constructor and not the call to the superclass constructor
+					// needed for OutInstruction
+					insConstructor = insClass.getConstructor(new Class<?>[]{String.class, int.class});
+					s1 = scanInt();
+					return (Instruction)insConstructor.newInstance(label, s1);
+				} else if (constr.getParameterTypes().length == 3 &&
+						constr.getParameterTypes()[2].equals(int.class)) {
+					// this is a 3-parameter constructor with two integers, e.g. for LinInstruction 
+					insConstructor = insClass.getConstructor(new Class<?>[]{String.class, int.class, int.class});
+					r = scanInt();
+					x = scanInt();
+					return (Instruction)insConstructor.newInstance(label, r, x);
+				} else if (constr.getParameterTypes().length == 3 &&
+						constr.getParameterTypes()[2].equals(String.class)) {
+					// this is a 3-parameter constructor with an integer and a string, e.g. for BnzInstruction
+					insConstructor = insClass.getConstructor(new Class<?>[]{String.class, int.class, String.class});
+					s1 = scanInt();
+					L2 = scan();
+					return (Instruction)insConstructor.newInstance(label, s1, L2);
+				} else if (constr.getParameterTypes().length == 4) {
+					// this is a 4-parameter constructor with three integers, e.g. for AddInstruction
+					insConstructor = insClass.getConstructor(new Class<?>[]{String.class, int.class, int.class, int.class});
+					r = scanInt();
+					s1 = scanInt();
+					s2 = scanInt();
+					return (Instruction)insConstructor.newInstance(label, r, s1, s2);
 				}
 			}
 		} catch (ClassNotFoundException e) {
-			System.out.println("Class" + className + "not found.");
+			System.out.println("Class " + insClassName + "not found.");
 		} catch (SecurityException e) {
-			System.out.println("Access to constructors for class " + className + " denied.");
+			System.out.println("Access to constructors for class " + insClassName + " denied.");
+		} catch (NoSuchMethodException e) {
+			System.out.println("No matching constructor found.");
+		} catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
+			System.out.println("Could not call constructor.");
 		}
+		return null;
 		
-		
+		/*
+		 * This is the old switch expression-based approach that directly instantiates Instruction subclasses
+		 * 
 		String ins = scan();
 		switch (ins) {
 		case "add":
@@ -155,11 +194,10 @@ public class Translator {
 			L2 = scan();
 			return new BnzInstruction(label, s1, L2);
 		}
-
-		// You will have to write code here for the other instructions.
-
 		return null;
+		*/
 	}
+
 
 	/*
 	 * Return the first word of line and remove it from line. If there is no
