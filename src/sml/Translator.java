@@ -2,6 +2,7 @@ package sml;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -81,7 +82,45 @@ public class Translator {
 
 		if (line.equals(""))
 			return null;
-
+		
+		/*
+		 * Create the fully qualified classname for the instruction and
+		 * then obtain a Class object. Next we get all the constructors declared
+		 * for the class.
+		 * 
+		 * To create a new instance of the class, we first find the constructor with more than
+		 * two parameters, since this corresponds to the full instruction rather than the
+		 * Instruction(String, String) constructor that does not contain parameters.
+		 * 
+		 * We will also need to check for two-parameter constructors with signature
+		 * Instruction(String, int), such as OutInstruction.
+		 */
+		String className = scan().toLowerCase() + "Instruction";
+		className = "sml." + className.substring(0,1).toUpperCase() + className.substring(1);
+		Class<?> cls;
+		try {
+			cls = Class.forName(className);
+			Constructor<?>[] allConstr = cls.getConstructors();
+			for (Constructor<?> constr : allConstr) {
+				if (constr.getParameterTypes().length > 2) {
+					for (Class<?> pType : constr.getParameterTypes()) {
+						if (pType.getName().equals("String.class")) {
+							scan();
+						} else if (pType.getName().equals("int.class")) {
+							scanInt();
+						}
+					}
+				} else if (constr.getParameterTypes().length == 2) {
+					// TODO
+				}
+			}
+		} catch (ClassNotFoundException e) {
+			System.out.println("Class" + className + "not found.");
+		} catch (SecurityException e) {
+			System.out.println("Access to constructors for class " + className + " denied.");
+		}
+		
+		
 		String ins = scan();
 		switch (ins) {
 		case "add":
