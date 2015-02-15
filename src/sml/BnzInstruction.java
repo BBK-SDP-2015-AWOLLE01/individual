@@ -3,7 +3,7 @@ package sml;
 /**
  * This class implements the branch-if-not-zero instruction in SML
  * 
- * @author someone
+ * @author Alex Wollenschlaeger
  */
 
 public class BnzInstruction extends Instruction {
@@ -22,7 +22,11 @@ public class BnzInstruction extends Instruction {
 	}
 
 	@Override
-	public void execute(Machine m) {
+	public void execute(Machine m) throws IllegalArgumentException {
+		if (m.getLabels().indexOf(label2) == -1) {
+			throw new IllegalArgumentException("Instruction not found.");
+		}
+		
 		if (m.getRegisters().getRegister(op1) != 0) {
 			m.setPc(m.getLabels().indexOf(label2));
 		}
