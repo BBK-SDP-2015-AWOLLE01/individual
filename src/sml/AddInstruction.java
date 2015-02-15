@@ -1,7 +1,7 @@
 package sml;
 
 /**
- * This class ....
+ * This class implements the add instruction in SML
  * 
  * @author someone
  */
