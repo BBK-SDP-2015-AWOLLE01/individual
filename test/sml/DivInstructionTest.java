@@ -31,4 +31,17 @@ public class DivInstructionTest {
 		assertEquals(op1 / op2, actual);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void DivInstructionThrowsExceptionWhenDivisorIsZero() {
+		int s1 = 20;
+		int s2 = 21;
+		int r = 22;
+		int op1 = 3;
+		int op2 = 0;
+		String l1 = "f1";
+		m.getRegisters().setRegister(s1, op1);
+		m.getRegisters().setRegister(s2, op2);
+		Instruction ins = new DivInstruction(l1, r, s1, s2);
+		ins.execute(m);
+	}
 }
